@@ -1,6 +1,7 @@
 import Immutable from 'immutable'
 import PHONE_NUMBER_TYPE from 'PhoneNumberType'
 import React from 'react'
+import SelectField from 'components/common/SelectField'
 
 export class PhoneNumbersEditView extends React.Component {
   constructor() {
@@ -64,21 +65,21 @@ export class PhoneNumbersEditView extends React.Component {
                 onChange={(event) => this.editAddedPhoneNumber([index, 'phone_number'], event.target.value)}
               />
             </div>
-            <div className='col-md-4'>
-              <label className='no-gap' htmlFor='phone_number_type'>Phone Number Type</label>
-              <select
-                id='phone_number_type'
-                value={phone_number_type || ''}
-                onChange={(event) => this.editAddedPhoneNumber([index, 'phone_number_type'], event.target.value)}
-              >
-                <option key='' value=''></option>
-                {
-                  Object.keys(PHONE_NUMBER_TYPE).map((item) =>
-                    <option key={item} value={item}>{PHONE_NUMBER_TYPE[item]}</option>
-                    )
-                }
-              </select>
-            </div>
+            <SelectField
+              gridClassName='col-md-4'
+              labelClassName='no-gap'
+              label='Phone Number Type'
+              id='phone_number_type'
+              value={phone_number_type || ''}
+              onChange={(event) => this.editAddedPhoneNumber([index, 'phone_number_type'], event.target.value)}
+            >
+              <option key='' value=''></option>
+              {
+                Object.keys(PHONE_NUMBER_TYPE).map((item) =>
+                  <option key={item} value={item}>{PHONE_NUMBER_TYPE[item]}</option>
+                  )
+              }
+            </SelectField>
             <div className='col-md-2'>
               <button
                 className='btn bg-secondary-red c-white'

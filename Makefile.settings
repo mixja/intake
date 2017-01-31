@@ -96,9 +96,13 @@ publish_image = { \
 	for tag in $(call get_repo_tags,$(1),$(2),$(3)); \
 		do echo $$tag | xargs -I TAG docker push TAG; \
 	done; \
-} 
+}
 
 # Exit code function
 # Syntax: $(call get_exit_code,<docker-compose-environment>,<service-name>)
 get_exit_code = $$(echo $(call get_container_state,$(1),$(2),{{ .State.ExitCode }}))
 check_exit_code = exit $(call get_exit_code,$(1),$(2))
+
+# Dangling image function
+# Syntax: $(call clean_dangling_images,<repository>)
+clean_dangling_images = docker images -q -f dangling=true -f label=application=$(1) | xargs -I ARGS docker rmi -f ARGS || true

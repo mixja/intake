@@ -37,6 +37,8 @@ test:
 build:
 	${INFO} "Building images..."
 	@ docker-compose $(TEST_ARGS) build builder
+	${INFO} "Removing existing artifacts..."
+	@ rm -rf release
 	${INFO} "Building application artifacts..."
 	@ docker-compose $(TEST_ARGS) up builder
 	@ $(call check_exit_code,$(TEST_ARGS),builder)
@@ -52,13 +54,13 @@ release:
 	@ docker-compose $(RELEASE_ARGS) build --pull nginx
 	${INFO} "Release image build complete..."
 	${INFO} "Starting application..."
+	@ docker-compose $(RELEASE_ARGS) up -d app
+	${INFO} "Starting nginx..."
 	@ docker-compose $(RELEASE_ARGS) up -d nginx
 	@ $(call check_service_health,$(RELEASE_ARGS),nginx)
 	${INFO} "Application is running at http://$(DOCKER_HOST_IP):$(call get_port_mapping,$(RELEASE_ARGS),nginx,$(HTTP_PORT))"
 
 clean:
-	${INFO} "Deleting application release artifacts..."
-	@ rm -rf release
 	${INFO} "Destroying development environment..."
 	@ docker-compose $(TEST_ARGS) down --volumes || true
 	${INFO} "Destroying release environment..."

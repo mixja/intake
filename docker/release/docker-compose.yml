@@ -14,13 +14,24 @@ services:
     environment:
       RAILS_ENV: production
       API_URL: "http://app:3000"
+      HEALTHCHECK: curl -fs --unix-socket /ca_intake/app.sock localhost
+    command:
+      - bundle
+      - exec
+      - puma
+      - -e
+      - production
+      - -b
+      - unix:///ca_intake/app.sock
+      - -C
+      - config/puma.rb
   nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    links:
-      - app
+    image: 429614120872.dkr.ecr.us-west-2.amazonaws.com/cwds/nginx
     ports:
       - "${HTTP_PORT}"
+    environment:
+      HTTP_PORT: ${HTTP_PORT}
+      WEB_ROOT: /ca_intake/public
+      UPSTREAM_URL: unix:///ca_intake/app.sock
     volumes:
       - webroot:/ca_intake

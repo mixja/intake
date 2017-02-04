@@ -12,7 +12,7 @@ services:
       context: ../../
       dockerfile: docker/release/Dockerfile
     volumes:
-      - webroot:/ca_intake
+      - webroot:/ca_intake/public
       - tmp:/tmp
     environment:
       RAILS_ENV: production
@@ -37,5 +37,5 @@ services:
       WEB_ROOT: /ca_intake/public
       UPSTREAM_URL: unix:///tmp/app.sock
     volumes:
-      - webroot:/ca_intake
+      - webroot:/ca_intake/public
       - tmp:/tmp

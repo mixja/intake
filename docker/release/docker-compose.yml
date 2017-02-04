@@ -3,6 +3,8 @@ version: '2'
 volumes:
   webroot:
     driver: local
+  tmp:
+    driver: local
 
 services:
   app:
@@ -11,10 +13,11 @@ services:
       dockerfile: docker/release/Dockerfile
     volumes:
       - webroot:/ca_intake
+      - tmp:/tmp
     environment:
       RAILS_ENV: production
       API_URL: "http://app:3000"
-      HEALTHCHECK: curl -fs --unix-socket /ca_intake/app.sock localhost
+      HEALTHCHECK: curl -fs --unix-socket /tmp/app.sock localhost
     command:
       - bundle
       - exec
@@ -22,7 +25,7 @@ services:
       - -e
       - production
       - -b
-      - unix:///ca_intake/app.sock
+      - unix:///tmp/app.sock
       - -C
       - config/puma.rb
   nginx:
@@ -32,6 +35,7 @@ services:
     environment:
       HTTP_PORT: ${HTTP_PORT}
       WEB_ROOT: /ca_intake/public
-      UPSTREAM_URL: unix:///ca_intake/app.sock
+      UPSTREAM_URL: unix:///tmp/app.sock
     volumes:
       - webroot:/ca_intake
+      - tmp:/tmp

@@ -18,6 +18,7 @@ services:
       RAILS_ENV: production
       API_URL: "http://app:3000"
       HEALTHCHECK: curl -fs --unix-socket /tmp/app.sock localhost
+      SECRET_KEY_BASE: bmcE7qdwemQrhf6NJR6OUlq05iqYH/fSXd1NT/aIdBI=
     command:
       - bundle
       - exec

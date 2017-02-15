@@ -54,9 +54,25 @@ release:
 	${INFO} "Pulling latest images..."
 	@ $(if $(NOPULL_ARG),,docker-compose $(RELEASE_ARGS) pull)
 	${INFO} "Building images..."
-	@ docker-compose $(RELEASE_ARGS) build app
-	@ docker-compose $(RELEASE_ARGS) build $(NOPULL_FLAG) nginx
+	@ docker-compose $(RELEASE_ARGS) build $(NOPULL_FLAG)
 	${INFO} "Release image build complete..."
+	${INFO} "Starting Intake API databases..."
+	@ docker-compose $(RELEASE_ARGS) up -d postgres
+	@ docker-compose $(RELEASE_ARGS) up -d elasticsearch
+	@ $(call check_service_health,$(RELEASE_ARGS),postgres)
+	@ $(call check_service_health,$(RELEASE_ARGS),elasticsearch)
+	${INFO} "Running Intake API database migrations..."
+	@ docker-compose $(RELEASE_ARGS) run intake-api bundle exec rake db:create
+	@ docker-compose $(RELEASE_ARGS) run intake-api bundle exec rake db:migrate
+	@ docker-compose $(RELEASE_ARGS) run intake-api bundle exec rake search:migrate
+	@ docker-compose $(RELEASE_ARGS) run intake-api bundle exec rake search:reindex
+	${INFO} "Starting Intake API..."
+	@ docker-compose $(RELEASE_ARGS) up -d intake-api
+	@ docker-compose $(RELEASE_ARGS) up -d intake-api-nginx
+	@ $(call check_service_health,$(RELEASE_ARGS),intake-api-nginx)
+	${INFO} "Starting redis..."
+	@ docker-compose $(RELEASE_ARGS) up -d redis
+	@ $(call check_service_health,$(RELEASE_ARGS),redis)
 	${INFO} "Starting application..."
 	@ docker-compose $(RELEASE_ARGS) up -d app
 	${INFO} "Starting nginx..."

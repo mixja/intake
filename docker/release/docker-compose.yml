@@ -5,6 +5,10 @@ volumes:
     driver: local
   tmp:
     driver: local
+  intake-api-webroot:
+    driver: local
+  intake-api-tmp:
+    driver: local
 
 services:
   app:
@@ -16,7 +20,7 @@ services:
       - tmp:/tmp
     environment:
       RAILS_ENV: production
-      API_URL: "http://app:3000"
+      API_URL: http://intake-api-nginx:${HTTP_PORT}/
       HEALTHCHECK: curl -fs --unix-socket /tmp/app.sock localhost
       SECRET_KEY_BASE: bmcE7qdwemQrhf6NJR6OUlq05iqYH/fSXd1NT/aIdBI=
       REDIS_HOST: redis
@@ -41,7 +45,45 @@ services:
       UPSTREAM_URL: unix:///tmp/app.sock
     volumes:
       - webroot:/ca_intake/public
-      - tmp:/tmp  redis:
+      - tmp:/tmp
+  redis:
     build:
       context: .
       dockerfile: Dockerfile.redis
+  intake-api:
+    image: 429614120872.dkr.ecr.us-west-2.amazonaws.com/cwds/intake-api
+    volumes:
+      - intake-api-webroot:/intake_api_prototype/public
+      - intake-api-tmp:/tmp
+    environment:
+      RAILS_ENV: production
+      PG_HOST: postgres
+      PG_USER: postgres
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    command:
+      - bundle
+      - exec
+      - puma
+      - -v
+      - -b
+      - unix:///tmp/app.sock
+  intake-api-nginx:
+    image: 429614120872.dkr.ecr.us-west-2.amazonaws.com/cwds/nginx
+    ports:
+      - "${HTTP_PORT}"
+    environment:
+      HTTP_PORT: ${HTTP_PORT}
+      WEB_ROOT: /intake_api_prototype/public
+      UPSTREAM_URL: unix:///tmp/app.sock
+      HEALTHCHECK: curl -fs localhost:${HTTP_PORT}/api/v1/screenings
+    volumes:
+      - intake-api-webroot:/intake_api_prototype/public
+      - intake-api-tmp:/tmp
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: Dockerfile.elasticsearch
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres

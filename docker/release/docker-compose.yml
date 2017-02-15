@@ -19,6 +19,8 @@ services:
       API_URL: "http://app:3000"
       HEALTHCHECK: curl -fs --unix-socket /tmp/app.sock localhost
       SECRET_KEY_BASE: bmcE7qdwemQrhf6NJR6OUlq05iqYH/fSXd1NT/aIdBI=
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     command:
       - bundle
       - exec
@@ -39,4 +41,7 @@ services:
       UPSTREAM_URL: unix:///tmp/app.sock
     volumes:
       - webroot:/ca_intake/public
-      - tmp:/tmp
+      - tmp:/tmp  redis:
+    build:
+      context: .
+      dockerfile: Dockerfile.redis

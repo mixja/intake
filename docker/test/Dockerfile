@@ -10,7 +10,7 @@ RUN mkdir /build_artefacts
 COPY scripts/build.sh /usr/local/bin/build.sh
 RUN chmod +x /usr/local/bin/build.sh
 
-COPY Gemfile Gemfile.lock $APP_HOME/
+COPY Gemfile Gemfile.lock package.json $APP_HOME/
 RUN bundle install -j24
 RUN npm install --spin=false
 COPY . $APP_HOME

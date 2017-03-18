@@ -90,7 +90,6 @@ clean:
 	${INFO} "Clean complete"
 
 # 'make tag [<tag>...]' tags development and/or release image with default tags or specified tag(s)
-tag: TAGS ?= $(if $(ARGS),$(ARGS),latest $(APP_VERSION) $(COMMIT_ID) $(COMMIT_TAG))
 tag:
 	${INFO} "Tagging release image with tags $(TAGS)..."
 	@ $(foreach tag,$(TAGS),$(call tag_image,$(RELEASE_ARGS),app,$(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME):$(tag));)

@@ -1,0 +1,29 @@
+node('docker') {
+    checkout scm
+
+    try {
+        stage('Test') {
+            sh 'make login'
+            sh 'make test'
+        }
+
+        stage('Release') {
+            sh 'make release'
+        }
+
+        stage('Publish') {
+            sh 'make tag'
+            sh 'make publish'
+        }
+    }
+    finally {
+        stage('Results') {
+            step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
+        }
+        
+        stage('Clean') {
+            sh 'make clean'
+            sh 'make logout'
+        }
+    }
+}

@@ -7,6 +7,10 @@ node('docker') {
             sh 'make test'
         }
 
+        stage('Build') {
+            sh 'make build'
+        }
+
         stage('Release') {
             sh 'make release'
         }
